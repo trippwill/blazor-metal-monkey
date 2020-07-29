@@ -1,11 +1,10 @@
-﻿using MetalMonkey.Core.Providers.Assets;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace MetalMonkey.Core.Providers
 {
-    interface ISiteProvider : IProvideScriptAssets
+    public interface ISiteProvider
     {
         IEnumerable<ISectionProvider> Sections { get; }
     }

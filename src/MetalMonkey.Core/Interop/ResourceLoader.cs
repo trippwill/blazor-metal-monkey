@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft;
+using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 using System;
 using System.Collections.Generic;
@@ -9,34 +10,89 @@ namespace MetalMonkey.Core.Interop
 {
     public class ResourceLoader
     {
-        private readonly IJSRuntime runtime;
+        private const string ResourceLoaderJs = "ResourceLoader.js";
+        private const string ResourceLoaderCss = "ResourceLoader.css";
+
+        private readonly IJSInProcessRuntime runtime;
         private readonly ILogger<ResourceLoader> logger;
 
         public ResourceLoader(IJSRuntime runtime, ILogger<ResourceLoader> logger)
         {
-            this.runtime = runtime;
+            this.runtime = (IJSInProcessRuntime)runtime;
             this.logger = logger;
         }
 
-        public ValueTask LoadJs(Uri uri)
+        private static void RequireUriIsRelative(Uri uri)
         {
+            Requires.Argument(!uri.IsAbsoluteUri, nameof(uri), "The uri must be relative to the wwwroot");
+        }
+
+        public ValueTask LoadJsAsync(Uri uri)
+        {
+            RequireUriIsRelative(uri);
+
+            string args = uri.ToString();
+
             try
             {
-                if (uri.IsAbsoluteUri) throw new ArgumentException();
-                return this.runtime.InvokeVoidAsync("ResourceLoader.js", uri.ToString());
+                return this.runtime.InvokeVoidAsync(ResourceLoaderJs, args);
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, "While loading JS {0}", uri.ToString());
+                this.logger.LogError(ex, "While loading JS {0} resource", args);
             }
 
             return new ValueTask();
         }
 
-        public ValueTask LoadCss(Uri uri)
+        public void LoadJs(Uri uri)
         {
-            if (uri.IsAbsoluteUri) throw new ArgumentException();
-            return this.runtime.InvokeVoidAsync("ResourceLoader.css", uri.ToString());
+            RequireUriIsRelative(uri);
+
+            string args = uri.ToString();
+
+            try
+            {
+                this.runtime.InvokeVoid(ResourceLoaderJs, args);
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, "While loading JS {0} resource", args);
+            }
+        }
+
+        public ValueTask LoadCssAsync(Uri uri)
+        {
+            RequireUriIsRelative(uri);
+
+            string args = uri.ToString();
+
+            try
+            {
+                return this.runtime.InvokeVoidAsync(ResourceLoaderCss, args);
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, "While loading CSS {0} resource", args);
+            }
+
+            return new ValueTask();
+        }
+
+        public void LoadCss(Uri uri)
+        {
+            RequireUriIsRelative(uri);
+
+            string args = uri.ToString();
+
+            try
+            {
+                this.runtime.InvokeVoid(ResourceLoaderCss, args);
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, "While loading CSS {0} resource", args);
+            }
         }
     }
 }

@@ -1,0 +1,15 @@
+﻿@inject MetalMonkey.Core.Interop.ResourceLoader ResourceLoader
+
+@code {
+
+    [Parameter]
+    public string? Rel { get; set; }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender && Uri.TryCreate(this.Rel, UriKind.Relative, out Uri uriRel))
+        {
+            this.ResourceLoader.LoadCss(uriRel);
+        }
+    }
+}

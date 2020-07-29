@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components" Version="3.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="3.1.2" />
+    <PackageReference Include="Microsoft.VisualStudio.Validation" Version="15.5.31" />
   </ItemGroup>
 
 </Project>

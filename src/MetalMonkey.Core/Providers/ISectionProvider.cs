@@ -1,12 +1,13 @@
-﻿using MetalMonkey.Core.Providers.Assets;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace MetalMonkey.Core.Providers
 {
-    interface ISectionProvider : IProvideScriptAssets
+    public interface ISectionProvider
     {
+        string Name { get; }
+
         ITemplateProvider Template { get; }
     }
 }

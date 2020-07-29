@@ -5,8 +5,10 @@ using System.Text;
 
 namespace MetalMonkey.Site.Templates.FutureImperfect
 {
-    public class FutureImperfect : ITemplateProvider
+    public readonly struct FutureImperfect : ITemplateProvider
     {
-        public IEnumerable<Uri> ScriptAssets { get; }
+        public Type IndexLayoutType => typeof(MainLayout);
+
+        public Type PageLayoutType => typeof(Single);
     }
 }

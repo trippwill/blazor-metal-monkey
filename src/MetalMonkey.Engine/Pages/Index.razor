@@ -1,3 +1,43 @@
 ﻿@page "/"
+@page "/{section}"
+@page "/{section}/{page}"
 
-<MetalMonkey.Site.Templates.FutureImperfect.SingleLayout></MetalMonkey.Site.Templates.FutureImperfect.SingleLayout>
+@inject ResolveSite ResolveSite
+@inject Microsoft.Extensions.Logging.ILogger<Index> Logger
+
+@using Microsoft.Extensions.Logging
+
+@GetContent()
+
+@code{
+    [Parameter]
+    public string? Section { get; set; }
+
+    [Parameter]
+    public string? Page { get; set; }
+
+    protected RenderFragment? GetContent() => builder =>
+    {
+            builder.OpenComponent(0, ResolveSite("MetalSite")
+                .Sections
+                .Single(sec => sec.Name.CaseInsensitiveEquals(Section))
+                .Template
+                .IndexLayoutType);
+            builder.CloseComponent();
+    };
+
+    public override async Task SetParametersAsync(ParameterView parameters)
+    {
+        await base.SetParametersAsync(parameters);
+        Section = Section ?? string.Empty;
+        Page = Page ?? string.Empty;
+    }
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        Logger.LogInformation("Section='{0}', Page='{1}'", Section, Page);
+    }
+
+}

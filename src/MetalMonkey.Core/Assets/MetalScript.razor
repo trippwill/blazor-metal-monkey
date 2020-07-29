@@ -1,0 +1,19 @@
+﻿@RenderContent
+
+@code {
+
+    [Parameter]
+    public string? Src { get; set; }
+
+    [Parameter]
+    public bool Defer { get; set; }
+
+    public RenderFragment RenderContent => builder =>
+    {
+        builder.OpenElement(0, "script");
+        builder.AddAttribute(1, "src", Src);
+        builder.AddAttribute(2, "defer", Defer);
+        builder.CloseElement();
+    };
+
+}
