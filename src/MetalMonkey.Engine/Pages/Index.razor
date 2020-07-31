@@ -1,13 +1,11 @@
-﻿@page "/"
-@page "/{section}"
-@page "/{section}/{page}"
-
-@inject ResolveSite ResolveSite
-@inject Microsoft.Extensions.Logging.ILogger<Index> Logger
+﻿@inject Microsoft.Extensions.Logging.ILogger<Index> Logger
+@inject NavigationManager Navigation
 
 @using Microsoft.Extensions.Logging
 
-@GetContent()
+@*@GetContent()*@
+
+
 
 @code{
     [Parameter]
@@ -16,21 +14,24 @@
     [Parameter]
     public string? Page { get; set; }
 
-    protected RenderFragment? GetContent() => builder =>
-    {
-            builder.OpenComponent(0, ResolveSite("MetalSite")
-                .Sections
-                .Single(sec => sec.Name.CaseInsensitiveEquals(Section))
-                .Template
-                .IndexLayoutType);
-            builder.CloseComponent();
-    };
+    //protected RenderFragment? GetContent() => builder =>
+    //{
+    //    builder.OpenComponent(0, ResolveSite("MetalSite")
+    //        .Sections
+    //        .Single(sec => sec.Name.CaseInsensitiveEquals(Section))
+    //        .Template
+    //        .IndexLayoutType);
+    //    builder.CloseComponent();
+    //};
 
     public override async Task SetParametersAsync(ParameterView parameters)
     {
+        var route = Navigation.ToBaseRelativePath(Navigation.Uri);
+        var segments = route.Split(new char[] { '/', '\\' });
+        Logger.LogInformation("++++----++++: {0}", route);
         await base.SetParametersAsync(parameters);
-        Section = Section ?? string.Empty;
-        Page = Page ?? string.Empty;
+        Section = Section ?? segments.ElementAtOrDefault(0) ?? string.Empty;
+        Page = Page ?? segments.ElementAtOrDefault(1) ?? string.Empty;
     }
 
     protected override void OnInitialized()

@@ -1,0 +1,13 @@
+﻿@inherits MetalMonkey.Engine.Routing.MetalRouteBase
+
+@if (IsActive)
+{
+<MetalMonkey.Site.Templates.FutureImperfect.SingleLayout></MetalMonkey.Site.Templates.FutureImperfect.SingleLayout>
+}
+
+@code {
+    protected override bool CanHandleRoute(Engine.Routing.MetalRouteContext routeContext)
+    {
+        return base.CanHandleRoute(routeContext) && true;
+    }
+}
