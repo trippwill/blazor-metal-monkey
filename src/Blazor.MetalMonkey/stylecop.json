@@ -1,0 +1,19 @@
+﻿{
+  // https://github.com/DotNetAnalyzers/StyleCopAnalyzers/blob/master/documentation/EnableConfiguration.md
+
+  "$schema": "https://raw.githubusercontent.com/DotNetAnalyzers/StyleCopAnalyzers/master/StyleCop.Analyzers/StyleCop.Analyzers/Settings/stylecop.schema.json",
+  "settings": {
+    "documentationRules": {
+      "companyName": "Charles Willis",
+      "copyrightText": "Copyright (c) {companyName}. All rights reserved.\nLicensed under the {licenseName} license. See {licenseFile} file in the project root for full license information.",
+      "variables": {
+        "licenseName": "MIT",
+        "licenseFile": "LICENSE"
+      },
+      "xmlHeader": false,
+      "documentInternalElements": false,
+      "documentExposedElements": false,
+      "documentInterfaces": false
+    }
+  }
+}
