@@ -1,10 +1,13 @@
-﻿namespace MetalMonkey.Engine.Routing
+﻿using Microsoft.AspNetCore.Components;
+
+namespace MetalMonkey.Engine.Routing
 {
-    public interface IMetalRoute
+    public interface IMetalRoute : IComponent
     {
         bool HandledRoute { get; }
 
-        bool CanHandleRoute(MetalRouteContext context);
+        void RegisterChildRoute(IMetalRoute route);
+
         void Reset();
     }
 }

@@ -4,16 +4,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.Components.Routing;
 using Microsoft.Extensions.Logging;
 
 namespace MetalMonkey.Engine.Routing
 {
-    public class MetalRouter : IComponent, IHandleAfterRender, IDisposable
+    public class MetalRouter : IMetalRoute, IHandleAfterRender, IDisposable
     {
         private const string _invalidParameterFormat = "The MetalRouter component requires a value for the parameter {0}";
 
@@ -33,6 +33,10 @@ namespace MetalMonkey.Engine.Routing
 
         [Inject] private ILogger<MetalRouter>? Logger { get; set; }
 
+        public bool HandledRoute => _registeredRoutes.Any(imr => imr.HandledRoute);
+
+        public void Reset() => _registeredRoutes.ForEach(imr => imr.Reset());
+
         public void Attach(RenderHandle renderHandle)
         {
             Assumes.Present(NavigationManager);
@@ -48,7 +52,6 @@ namespace MetalMonkey.Engine.Routing
             parameters.SetParameterProperties(this);
 
             Verify.Operation(Routes is not null, string.Format(_invalidParameterFormat, nameof(Routes)));
-            Verify.Operation(Unhandled is not null, string.Format(_invalidParameterFormat, nameof(Unhandled)));
 
             Assumes.Present(NavigationManager);
             Assumes.NotNull(_locationAbsolute);
@@ -77,40 +80,52 @@ namespace MetalMonkey.Engine.Routing
             NavigationManager.LocationChanged -= NavigationManager_LocationChanged;
         }
 
-        internal void RegisterRoute(IMetalRoute route)
+        public void RegisterChildRoute(IMetalRoute route)
         {
+            Logger.LogDebug("{MetalRouter} registering child route for segments '{Segments}'", nameof(MetalRouter), (route as SegmentRoute)?.Segments);
             _registeredRoutes.Add(route);
+            //Refresh(_navigationInterceptionEnabled, skipUnhandled: true);
         }
 
-        internal void Refresh(bool isNavigationIntercepted)
+        internal void Refresh(bool isNavigationIntercepted, bool skipUnhandled = false)
         {
             Assumes.Present(NavigationManager);
             Assumes.NotNull(_locationAbsolute);
             var locationPath = NavigationManager.ToBaseRelativePath(_locationAbsolute);
             var context = MetalRouteContext.FromBaseRelativePath(this, locationPath);
 
-            Logger.LogDebug("Attempting to navigate using defined routes in response to path '{Path}' with base '{Base}'", locationPath, _baseUri);
+            Logger.LogDebug("Attempting to navigate using defined routes in response to path '{Path}' with base '{Base}' and intercepted '{Intercepted}'", locationPath, _baseUri, isNavigationIntercepted);
 
-            _renderHandle.Render(builder =>
-            {
-                builder.AddContent(0, Routes, context);
-            });
+            Assumes.NotNull(Routes);
+            _renderHandle.Render(Routes(context));
 
-            if (_registeredRoutes.Any(rt => rt.HandledRoute))
+            if (HandledRoute)
             {
-                _registeredRoutes.ForEach(rt => rt.Reset());
+                Reset();
                 return;
             }
 
+            if (skipUnhandled)
+                return;
+
+            OnUnhandled(isNavigationIntercepted, locationPath);
+        }
+
+        internal virtual void OnUnhandled(bool isNavigationIntercepted, string locationPath)
+        {
             if (!isNavigationIntercepted)
             {
-                Logger.LogDebug("Displaying Unhandled component in reponse to path '{Path}' with base '{Base}'", locationPath, _baseUri);
-
-                Assumes.NotNull(Unhandled);
-                _renderHandle.Render(Unhandled);
+                if (Unhandled is not null)
+                {
+                    Logger.LogDebug("Displaying Unhandled component in reponse to path '{Path}' with base '{Base}'", locationPath, _baseUri);
+                    _renderHandle.Render(Unhandled);
+                }
             }
             else
             {
+                Assumes.Present(NavigationManager);
+                Assumes.Present(_locationAbsolute);
+
                 Logger.LogDebug("Navigating to non - component URI '{ExternalUri}' in response to path '{Path}' with base '{Base}'", _locationAbsolute, locationPath, _baseUri);
                 NavigationManager.NavigateTo(_locationAbsolute, forceLoad: true);
             }

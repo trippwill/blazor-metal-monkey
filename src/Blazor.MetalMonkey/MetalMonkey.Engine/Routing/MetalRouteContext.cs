@@ -6,9 +6,9 @@ namespace MetalMonkey.Engine.Routing
 {
     public readonly struct MetalRouteContext
     {
-        internal MetalRouteContext(MetalRouter router, IEnumerable<string> parentSegments, IEnumerable<string> currentSegments)
+        internal MetalRouteContext(IMetalRoute parentRoute, IEnumerable<string> parentSegments, IEnumerable<string> currentSegments)
         {
-            MetalRouter = router;
+            ParentRoute = parentRoute;
             ParentSegments = parentSegments;
             CurrentSegments = currentSegments;
         }
@@ -17,7 +17,7 @@ namespace MetalMonkey.Engine.Routing
 
         public IEnumerable<string> CurrentSegments {get;}
 
-        public MetalRouter MetalRouter { get; }
+        public IMetalRoute ParentRoute { get; }
 
         internal static MetalRouteContext FromBaseRelativePath(MetalRouter router, string relativePath)
         {
@@ -28,7 +28,7 @@ namespace MetalMonkey.Engine.Routing
             );
         }
 
-        internal MetalRouteContext MoveCapturedToParent(IEnumerable<string> capturedSegments)
+        internal MetalRouteContext MoveCapturedToParent(IMetalRoute parentRoute, IEnumerable<string> capturedSegments)
         {
             var currentCapturedSegments = CurrentSegments.TakeWhile((cseg, idx) => capturedSegments.ElementAtOrDefault(idx).EqualsIgnoreCase(cseg));
             if (currentCapturedSegments is null || !currentCapturedSegments.Any())
@@ -37,10 +37,10 @@ namespace MetalMonkey.Engine.Routing
             }
 
             return new MetalRouteContext(
-                MetalRouter,
+                parentRoute,
                 ParentSegments.Concat(currentCapturedSegments),
                 CurrentSegments.Skip(currentCapturedSegments.Count())
-            );
+                );
         }
 
         public override string ToString()

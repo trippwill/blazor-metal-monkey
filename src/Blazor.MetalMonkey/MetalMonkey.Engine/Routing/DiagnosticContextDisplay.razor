@@ -1,0 +1,11 @@
+﻿
+<div>
+    <pre>[@DisplayName]: @RouteContext.ToString()</pre>
+</div>
+
+@code {
+
+    [Parameter] public MetalRouteContext RouteContext { get; set; }
+
+    [Parameter] public string? DisplayName { get; set; }
+}
