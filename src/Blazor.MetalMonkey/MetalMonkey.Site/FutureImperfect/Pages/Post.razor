@@ -1,0 +1,34 @@
+﻿@using MetalMonkey.Engine.Components
+
+<!-- Post -->
+<article class="post">
+    <header>
+        <div class="title">
+            <h2><a href="#">@FrontMatter.Title</a></h2>
+            <p>@FrontMatter.Lede</p>
+        </div>
+        <div class="meta">
+            <time class="published" datetime="@FrontMatter.Published.ToString("s")">@FrontMatter.Published.ToString("D")</time>
+            <a href="#" class="author"><span class="name">@FrontMatter.Author</span><img src="@FrontMatter.AuthorAvatar" alt="" /></a>
+        </div>
+    </header>
+    <span class="image featured"><img src="@FrontMatter.FeaturedImage" alt="@FrontMatter.FeaturedImageAlt" /></span>
+    @Content
+    <footer>
+        <ul class="stats">
+            @foreach(var tag in FrontMatter.Tags)
+            { 
+                <li><a href="#">@tag</a></li>
+            }
+            <li><a href="#" class="icon solid fa-heart">@FrontMatter.Likes</a></li>
+            <li><a href="#" class="icon solid fa-comment">@FrontMatter.CommentCount</a></li>
+        </ul>
+    </footer>
+</article>
+
+@code {
+
+    [Parameter] public RenderFragment Content { get; set; } = MetalMonkey.Engine.Utilities.EmptyRenderFragment;
+
+    [Parameter] public FrontMatter FrontMatter { get; set; } = FrontMatter.Default;
+}

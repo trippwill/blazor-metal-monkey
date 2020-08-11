@@ -1,38 +1,26 @@
 @using MetalMonkey.Engine.Routing
 
+<ul>
+    <li><a href="page">Page</a></li>
+    <li><a href="page/test-page">Test Page</a></li>
+    <li><a href="catalog">Catalog</a></li>
+    <li><a href="catalog/april/test-page">April</a></li>
+    <li><a href="catalog/blah">Blah</a></li>
+    <li><a href="catalog/month/april/35">April 35</a></li>
+</ul>
 <MetalRouter>
-        <Routes>
-            <ul>
-                <li><a href="page">Page</a></li>
-                <li><a href="catalog">Catalog</a></li>
-                <li><a href="catalog/month/april">April</a></li>
-                <li><a href="catalog/blah">Blah</a></li>
-                <li><a href="catalog/month/april/35">April 35</a></li>
-            </ul>
-            <SegmentRoute Id="Page" Segments="page" RouteContext="@context" Context="page_context" Layout="@typeof(MetalMonkey.Site.FutureImperfect.Shared.PageLayout)">
-                <ChildContent>
-                    <DiagnosticContextDisplay RouteContext="@page_context" DisplayName="Page" />
-                </ChildContent>
-                <IndexContent>
-                    <LayoutView Layout="@typeof(MetalMonkey.Site.FutureImperfect.Shared.IndexLayout)" />
-                </IndexContent>
-            </SegmentRoute>
-            <SegmentRoute Id="Catalog" Segments="catalog" RouteContext="@context" Context="catalog_context" Layout="@typeof(MainLayout)">
-                <DiagnosticContextDisplay RouteContext="@catalog_context" DisplayName="Catalog" />
-                <SegmentRoute Id="April" Segments="month/april" RouteContext="@catalog_context" Context="month_april_context">
-                    <DiagnosticContextDisplay RouteContext="@month_april_context" DisplayName="Month/April" />
-                </SegmentRoute>
-            </SegmentRoute>
-        </Routes>
-        <Unhandled>
-            <LayoutView Layout="@typeof(MainLayout)">
-                <ul>
-                    <li><a href="page">Page</a></li>
-                    <li><a href="catalog">Catalog</a></li>
-                    <li><a href="catalog/month/april">April</a></li>
-                    <li><a href="catalog/blah">Blah</a></li>
-                </ul>
-                <p>Sorry, there's nothing at this address.</p>
+    <RouteTable RouteContext="@context">
+        <RoutePath Segments="page" Rank="50" Context="page_context">
+            <LayoutView Layout=typeof(MetalMonkey.Site.FutureImperfect.Shared.PageLayout)>
+                <PageRouter Root="data/pages" RouteContext="@page_context" Context="post">
+                    <MetalMonkey.Site.FutureImperfect.Pages.Post  Content="@post.Content" FrontMatter="@post.FrontMatter" />
+                </PageRouter>
             </LayoutView>
-        </Unhandled>
-    </MetalRouter>
+        </RoutePath>
+        <RoutePath Segments="catalog/april" Context="april_context">
+            <PageRouter Root="data/pages" RouteContext="@april_context" Context="month">
+                <h1>@month.FrontMatter.Title</h1>
+            </PageRouter>
+        </RoutePath>
+    </RouteTable>
+</MetalRouter>

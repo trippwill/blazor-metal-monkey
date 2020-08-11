@@ -2,8 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using Blazor.Extensions.Logging;
+using Markdig;
+using MetalMonkey.Engine.Routing;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -19,6 +22,8 @@ namespace MetalMonkey.Engine
             builder.Services.AddLogging(builder => builder
                 .AddBrowserConsole()
                 .SetMinimumLevel(logLevel));
+
+            builder.Services.AddSingleton(new MarkdownPipelineBuilder().UseAdvancedExtensions().Build());
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 

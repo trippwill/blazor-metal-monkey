@@ -1,14 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using Microsoft.AspNetCore.Components;
 
 namespace MetalMonkey.Engine.Routing
 {
+    [DebuggerDisplay("{" + nameof(DebuggerDisplay ) + ",nq}")]
     public readonly struct MetalRouteContext
     {
-        internal MetalRouteContext(IMetalRoute parentRoute, IEnumerable<string> parentSegments, IEnumerable<string> currentSegments)
+        internal MetalRouteContext(IEnumerable<string> parentSegments, IEnumerable<string> currentSegments)
         {
-            ParentRoute = parentRoute;
             ParentSegments = parentSegments;
             CurrentSegments = currentSegments;
         }
@@ -17,18 +19,15 @@ namespace MetalMonkey.Engine.Routing
 
         public IEnumerable<string> CurrentSegments {get;}
 
-        public IMetalRoute ParentRoute { get; }
-
-        internal static MetalRouteContext FromBaseRelativePath(MetalRouter router, string relativePath)
+        internal static MetalRouteContext FromBaseRelativePath(string relativePath)
         {
             return new MetalRouteContext(
-                router,
                 Enumerable.Empty<string>(),
                 relativePath.Split('/')
             );
         }
 
-        internal MetalRouteContext MoveCapturedToParent(IMetalRoute parentRoute, IEnumerable<string> capturedSegments)
+        internal MetalRouteContext MoveCapturedToParent(IEnumerable<string> capturedSegments)
         {
             var currentCapturedSegments = CurrentSegments.TakeWhile((cseg, idx) => capturedSegments.ElementAtOrDefault(idx).EqualsIgnoreCase(cseg));
             if (currentCapturedSegments is null || !currentCapturedSegments.Any())
@@ -37,7 +36,6 @@ namespace MetalMonkey.Engine.Routing
             }
 
             return new MetalRouteContext(
-                parentRoute,
                 ParentSegments.Concat(currentCapturedSegments),
                 CurrentSegments.Skip(currentCapturedSegments.Count())
                 );
@@ -47,5 +45,7 @@ namespace MetalMonkey.Engine.Routing
         {
             return $"ParentSegments={ParentSegments.JoinPath()}, CurrentSegments={CurrentSegments.JoinPath()}";
         }
+
+        private string DebuggerDisplay => ToString();
     }
 }
