@@ -9,16 +9,18 @@
     <li><a href="catalog/month/april/35">April 35</a></li>
 </ul>
 <MetalRouter>
-    <RouteTable RouteContext="@context">
-        <RoutePath Segments="page" Rank="50" Context="page_context">
-            <LayoutView Layout=typeof(MetalMonkey.Site.FutureImperfect.Shared.PageLayout)>
-                <PageRouter Root="data/pages" RouteContext="@page_context" Context="post">
-                    <MetalMonkey.Site.FutureImperfect.Pages.Post  Content="@post.Content" FrontMatter="@post.FrontMatter" />
-                </PageRouter>
-            </LayoutView>
+    <RouteTable>
+        <RoutePath Segments="page" Rank="50">
+            <MetalMonkey.Site.FutureImperfect.Shared.PageLayout>
+                <Body>
+                    <PageRouter Root="data/pages" RouteContext="@context" Context="post">
+                        <MetalMonkey.Site.FutureImperfect.Pages.Post Content="@post.Content" FrontMatter="@post.FrontMatter" />
+                    </PageRouter>
+                </Body>
+            </MetalMonkey.Site.FutureImperfect.Shared.PageLayout>
         </RoutePath>
-        <RoutePath Segments="catalog/april" Context="april_context">
-            <PageRouter Root="data/pages" RouteContext="@april_context" Context="month">
+        <RoutePath Segments="catalog/april">
+            <PageRouter Root="data/pages" RouteContext="@context" Context="month">
                 <h1>@month.FrontMatter.Title</h1>
             </PageRouter>
         </RoutePath>

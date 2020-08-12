@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft;
 using Microsoft.AspNetCore.Components;
@@ -10,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace MetalMonkey.Engine.Routing
 {
-    public class MetalRouter : IComponent, IHandleAfterRender, IDisposable
+    public class MetalRouter : MetalRouteBase, IHandleAfterRender, IDisposable
     {
         private const string _invalidParameterFormat = "The MetalRouter component requires a value for the parameter {0}";
 
@@ -19,7 +20,7 @@ namespace MetalMonkey.Engine.Routing
         private string? _locationAbsolute;
         private bool _navigationInterceptionEnabled;
 
-        [Parameter] public RenderFragment<MetalRouteContext> ChildContent { get; set; } = _ => Utilities.EmptyRenderFragment;
+        [Parameter] public RenderFragment ChildContent { get; set; } = Utilities.EmptyRenderFragment;
 
         [Inject] private NavigationManager? NavigationManager { get; set; }
 
@@ -27,13 +28,7 @@ namespace MetalMonkey.Engine.Routing
 
         [Inject] private ILogger<MetalRouter>? Logger { get; set; }
 
-        private RouteTable? _routeTable;
-
-        public bool CanHandleRoute(MetalRouteContext nextContext) => true;
-
-        public bool Handled { get; set; }
-
-        public void Attach(RenderHandle renderHandle)
+        public override void Attach(RenderHandle renderHandle)
         {
             Assumes.Present(NavigationManager);
 
@@ -43,7 +38,7 @@ namespace MetalMonkey.Engine.Routing
             NavigationManager.LocationChanged += NavigationManager_LocationChanged;
         }
 
-        public Task SetParametersAsync(ParameterView parameters)
+        public override Task SetParametersAsync(ParameterView parameters)
         {
             parameters.SetParameterProperties(this);
 
@@ -64,14 +59,13 @@ namespace MetalMonkey.Engine.Routing
             return Task.CompletedTask;
         }
 
-        public void Dispose()
+        public override void Dispose()
         {
-            Assumes.Present(NavigationManager);
+            base.Dispose();
 
+            Assumes.Present(NavigationManager);
             NavigationManager.LocationChanged -= NavigationManager_LocationChanged;
         }
-
-        internal void SetRouteTable(RouteTable routeTable) => _routeTable = routeTable;
 
         internal void Refresh(bool isNavigationIntercepted)
         {
@@ -86,13 +80,19 @@ namespace MetalMonkey.Engine.Routing
             {
                 builder.OpenComponent<CascadingValue<MetalRouter?>>(0);
                 builder.AddAttribute(1, nameof(CascadingValue<MetalRouter?>.Value), this);
-                builder.AddAttribute(2, nameof(CascadingValue<MetalRouter?>.ChildContent), ChildContent(context));
+                builder.AddAttribute(2, nameof(CascadingValue<MetalRouter?>.ChildContent), new RenderFragment(builder2 =>
+                {
+                    builder2.OpenComponent<CascadingValue<MetalRouteContext>>(3);
+                    builder2.AddAttribute(4, nameof(CascadingValue<MetalRouteContext>.Value), context);
+                    builder2.AddAttribute(5, nameof(CascadingValue<MetalRouteContext>.ChildContent), ChildContent);
+                    builder2.CloseComponent();
+                }));
                 builder.CloseComponent();
             });
 
             _renderHandle.Render(builder =>
             {
-                var frag = _routeTable?.GetRenderFragment();
+                var frag = RenderContainers.SingleOrDefault()?.GetRenderFragment();
                 if (frag is not null)
                 {
                     builder.AddContent(3, frag);
@@ -101,6 +101,8 @@ namespace MetalMonkey.Engine.Routing
                 {
                     OnUnhandled(isNavigationIntercepted, locationPath);
                 }
+
+                RenderContainers.Clear();
             });
         }
 

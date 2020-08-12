@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Components;
 
 namespace MetalMonkey.Engine.Routing
 {
-    public class RoutePath : IComponent
+    public class RoutePath : IComponent, IRenderContainer
     {
         private List<string> _segments = Utilities.EmptyStringList;
 
@@ -18,6 +18,8 @@ namespace MetalMonkey.Engine.Routing
         [Parameter] public RenderFragment<MetalRouteContext> ChildContent { get; set; } = _ => Utilities.EmptyRenderFragment;
 
         [CascadingParameter] public RouteTable? RouteTable { get; set; }
+
+        [CascadingParameter] public MetalRouteContext RouteContext { get; set; }
 
         public void Attach(RenderHandle _)
         {
@@ -30,17 +32,17 @@ namespace MetalMonkey.Engine.Routing
             _segments = Segments.SplitPath().ToList();
 
             Assumes.Present(RouteTable);
-            if (RouteTable.RouteContext.CurrentSegments.SequenceStartsWith(
+            if (RouteContext.CurrentSegments.SequenceStartsWith(
                 _segments,
                 StringComparer.OrdinalIgnoreCase))
             {
-                RouteTable.Add(this);
+                RouteTable.AddRenderContainer(this);
             }
 
             return Task.CompletedTask;
         }
 
-        public RenderFragment GetRenderFragment(MetalRouteContext currentContext) =>
-            ChildContent(currentContext.MoveCapturedToParent(_segments));
+        RenderFragment? IRenderContainer.GetRenderFragment() =>
+            ChildContent(RouteContext.CaptureSegments(_segments));
     }
 }

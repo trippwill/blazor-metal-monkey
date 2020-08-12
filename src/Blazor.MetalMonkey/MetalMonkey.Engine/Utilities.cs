@@ -10,5 +10,7 @@ namespace MetalMonkey.Engine
         public static RenderFragment EmptyRenderFragment { get; } = _ => {};
 
         public static List<string> EmptyStringList { get; } = Enumerable.Empty<string>().ToList();
+
+        public static IList<T> GetEmptyList<T>() => Enumerable.Empty<T>().ToList();
     }
 }

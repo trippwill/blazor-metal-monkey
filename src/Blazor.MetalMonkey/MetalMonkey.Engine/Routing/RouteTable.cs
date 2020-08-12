@@ -7,28 +7,28 @@ using Microsoft.AspNetCore.Components;
 
 namespace MetalMonkey.Engine.Routing
 {
-    public class RouteTable : IComponent
+    public class RouteTable : MetalRouteBase, IRenderContainer
     {
-        private List<RoutePath> _routePaths = new List<RoutePath>();
         private RenderHandle _renderHandle;
+
+        [Parameter] public uint Rank { get; set; } = 50;
 
         [Parameter] public RenderFragment ChildContent { get; set; } = Utilities.EmptyRenderFragment;
 
-        //[Parameter] public MetalRouteContext RouteContext { get; set; }
-
         [CascadingParameter] public MetalRouter? MetalRouter { get; set; }
 
-        public void Attach(RenderHandle renderHandle)
+        public override void Attach(RenderHandle renderHandle)
         {
             _renderHandle = renderHandle;
         }
 
-        public Task SetParametersAsync(ParameterView parameters)
+        public override Task SetParametersAsync(ParameterView parameters)
         {
             parameters.SetParameterProperties(this);
 
             Assumes.NotNull(MetalRouter);
-            MetalRouter.SetRouteTable(this);
+
+            MetalRouter.AddRenderContainer(this);
 
             _renderHandle.Render(builder =>
             {
@@ -41,11 +41,9 @@ namespace MetalMonkey.Engine.Routing
             return Task.CompletedTask;
         }
 
-        internal void Add(RoutePath routePath) => _routePaths.Add(routePath);
-
-        internal RenderFragment? GetRenderFragment() => _routePaths
-            .OrderBy(rp => rp.Rank)
+        RenderFragment? IRenderContainer.GetRenderFragment() => RenderContainers
+            .OrderBy(rc => rc.Rank)
             .FirstOrDefault()?
-            .GetRenderFragment(RouteContext);
+            .GetRenderFragment();
     }
 }

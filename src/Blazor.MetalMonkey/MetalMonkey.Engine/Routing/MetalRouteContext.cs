@@ -1,21 +1,17 @@
-using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using Microsoft.AspNetCore.Components;
 
 namespace MetalMonkey.Engine.Routing
 {
-    [DebuggerDisplay("{" + nameof(DebuggerDisplay ) + ",nq}")]
     public readonly struct MetalRouteContext
     {
         internal MetalRouteContext(IEnumerable<string> parentSegments, IEnumerable<string> currentSegments)
         {
-            ParentSegments = parentSegments;
+            CapturedSegments = parentSegments;
             CurrentSegments = currentSegments;
         }
 
-        public IEnumerable<string> ParentSegments {get;}
+        public IEnumerable<string> CapturedSegments {get;}
 
         public IEnumerable<string> CurrentSegments {get;}
 
@@ -27,7 +23,7 @@ namespace MetalMonkey.Engine.Routing
             );
         }
 
-        internal MetalRouteContext MoveCapturedToParent(IEnumerable<string> capturedSegments)
+        internal MetalRouteContext CaptureSegments(IEnumerable<string> capturedSegments)
         {
             var currentCapturedSegments = CurrentSegments.TakeWhile((cseg, idx) => capturedSegments.ElementAtOrDefault(idx).EqualsIgnoreCase(cseg));
             if (currentCapturedSegments is null || !currentCapturedSegments.Any())
@@ -36,16 +32,14 @@ namespace MetalMonkey.Engine.Routing
             }
 
             return new MetalRouteContext(
-                ParentSegments.Concat(currentCapturedSegments),
+                CapturedSegments.Concat(currentCapturedSegments),
                 CurrentSegments.Skip(currentCapturedSegments.Count())
                 );
         }
 
         public override string ToString()
         {
-            return $"ParentSegments={ParentSegments.JoinPath()}, CurrentSegments={CurrentSegments.JoinPath()}";
+            return $"ParentSegments={CapturedSegments.JoinPath()}, CurrentSegments={CurrentSegments.JoinPath()}";
         }
-
-        private string DebuggerDisplay => ToString();
     }
 }
