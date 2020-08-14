@@ -1,0 +1,42 @@
+﻿@typeparam TView
+
+<CascadingValue Value=@this TValue="ViewIndex<TView>">
+    @IndexHeaderTemplate(Views)
+</CascadingValue>
+
+@ActiveSection?.GetContent(RoutingManager!.CurrentTopRouteContext.CaptureSegments(Base))
+
+@code {
+        [Parameter] public string Base { get; set; } = string.Empty;
+
+        [Parameter] public RenderFragment? Views { get; set; }
+
+        [Parameter] public RenderFragment<TView> ViewHeadingTemplate { get; set; } = DefaultViewHeadingTemplate;
+
+        [Parameter] public RenderFragment<RenderFragment?> IndexHeaderTemplate { get; set; } = DefaultIndexHeaderTemplate;
+
+    private static RenderFragment<TView> DefaultViewHeadingTemplate => view => builder =>
+    {
+        if (view.Heading is not null)
+        {
+            builder.OpenRegion(0);
+            builder.OpenElement(0, "li");
+            builder.AddAttribute(1, "key", view.Name);
+            builder.OpenElement(2, "a");
+            builder.AddAttribute(3, "onclick", EventCallback.Factory.Create(view, view.Activate));
+            builder.AddContent(4, view.Heading);
+            builder.CloseElement(); //a
+            builder.CloseElement(); // li
+            builder.CloseRegion();
+        }
+    };
+
+    private static RenderFragment<RenderFragment?> DefaultIndexHeaderTemplate => content => builder =>
+    {
+        builder.OpenRegion(1);
+        builder.OpenElement(0, "ul");
+        builder.AddContent(1, content);
+        builder.CloseElement();
+        builder.CloseRegion();
+    };
+}

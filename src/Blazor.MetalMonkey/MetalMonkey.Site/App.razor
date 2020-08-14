@@ -1,28 +1,65 @@
 @using MetalMonkey.Engine.Routing
+@using MetalMonkey.Site.FutureImperfect.Shared
+@using MetalMonkey.Site.FutureImperfect.Pages
 
-<ul>
-    <li><a href="page">Page</a></li>
-    <li><a href="page/test-page">Test Page</a></li>
-    <li><a href="catalog">Catalog</a></li>
-    <li><a href="catalog/april/test-page">April</a></li>
-    <li><a href="catalog/blah">Blah</a></li>
-    <li><a href="catalog/month/april/35">April 35</a></li>
-</ul>
-<MetalRouter>
-    <RouteTable>
-        <RoutePath Segments="page" Rank="50">
-            <MetalMonkey.Site.FutureImperfect.Shared.PageLayout>
-                <Body>
-                    <PageRouter Root="data/pages" RouteContext="@context" Context="post">
-                        <MetalMonkey.Site.FutureImperfect.Pages.Post Content="@post.Content" FrontMatter="@post.FrontMatter" />
-                    </PageRouter>
-                </Body>
-            </MetalMonkey.Site.FutureImperfect.Shared.PageLayout>
-        </RoutePath>
-        <RoutePath Segments="catalog/april">
-            <PageRouter Root="data/pages" RouteContext="@context" Context="month">
-                <h1>@month.FrontMatter.Title</h1>
-            </PageRouter>
-        </RoutePath>
-    </RouteTable>
-</MetalRouter>
+<ViewIndex TView=Section>
+    <Views>
+        <Section>
+            <Heading>Home</Heading>
+            <Content>
+                <MetalMonkey.Site.FutureImperfect.Pages.Post>
+                    <Content>Head Section</Content>
+                </MetalMonkey.Site.FutureImperfect.Pages.Post>
+            </Content>
+        </Section>
+
+        <Section Name="pages">
+            <Heading>Pages</Heading>
+            <Content>
+                <PageLayout>
+                    <Body>
+                        <h4>Pages Section</h4>
+                    </Body>
+                </PageLayout>
+            </Content>
+        </Section>
+
+        <Section Name="blog">
+            <Heading>Blog</Heading>
+            <Content>
+                <ViewIndex TView=Section Base="blog">
+                    <Views>
+                        <Section>
+                            <Heading>Blog Home</Heading>
+                            <Content Context="routeContext">
+                                <IndexLayout>
+                                    <Body>
+                                        Blog Home Section
+                                    </Body>
+                                </IndexLayout>
+                            </Content>
+                        </Section>
+                        <Section Name="post">
+                            <Content Context="routeContext">
+                                <PageLayout>
+                                    <Body>
+                                        <PostRouter Root="data/pages" RouteContext="routeContext" Context="post">
+                                            <Post Content="@post.Content" FrontMatter="@post.FrontMatter" />
+                                        </PostRouter>
+                                    </Body>
+                                </PageLayout>
+                            </Content>
+                        </Section>
+                    </Views>
+                </ViewIndex>
+            </Content>
+        </Section>
+
+        <Section>
+            <Heading>Photos</Heading>
+            <Content>
+                <h4>Photos Section</h4>
+            </Content>
+        </Section>
+    </Views>
+</ViewIndex>

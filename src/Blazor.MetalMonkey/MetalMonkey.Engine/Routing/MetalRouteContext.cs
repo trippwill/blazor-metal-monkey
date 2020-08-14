@@ -23,7 +23,7 @@ namespace MetalMonkey.Engine.Routing
             );
         }
 
-        internal MetalRouteContext CaptureSegments(IEnumerable<string> capturedSegments)
+        internal MetalRouteContext CaptureSegments(params string[] capturedSegments)
         {
             var currentCapturedSegments = CurrentSegments.TakeWhile((cseg, idx) => capturedSegments.ElementAtOrDefault(idx).EqualsIgnoreCase(cseg));
             if (currentCapturedSegments is null || !currentCapturedSegments.Any())

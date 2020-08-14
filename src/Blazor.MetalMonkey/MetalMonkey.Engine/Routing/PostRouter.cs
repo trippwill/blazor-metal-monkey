@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Markdig;
@@ -10,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace MetalMonkey.Engine.Routing
 {
-    public class PageRouter : ComponentBase, IMetalRoutable
+    public class PostRouter : ComponentBase
     {
         private string? _content;
         private bool _shouldRender;
@@ -19,18 +20,20 @@ namespace MetalMonkey.Engine.Routing
 
         [Parameter] public string Root { get; set; } = string.Empty;
 
-        [Parameter] public RenderFragment<PageContext>? ChildContent { get; set; }
+        [Parameter] public RenderFragment<PostContext>? ChildContent { get; set; }
 
         [Inject] private HttpClient? HttpClient { get; set; }
 
         [Inject] private MarkdownPipeline? MarkdownPipeline { get; set; }
 
-        [Inject] private ILogger<PageRouter>? Logger { get; set; }
+        [Inject] private ILogger<PostRouter>? Logger { get; set; }
+
+        [Inject] private RoutingManager? RoutingManager { get; set; }
 
         public override async Task SetParametersAsync(ParameterView parameters)
         {
             await base.SetParametersAsync(parameters);
-            Verify.Operation(ChildContent is not null, $"{nameof(PageRouter)} requires a renderable child component");
+            Verify.Operation(ChildContent is not null, $"{nameof(PostRouter)} requires a renderable child component");
         }
 
         protected override async Task OnInitializedAsync()
@@ -53,12 +56,22 @@ namespace MetalMonkey.Engine.Routing
             {
                 Assumes.NotNull(_content);
 
-                PageContext pageContext = new PageContext(FrontMatter.Default, builder =>
+                PostContext pageContext = new PostContext(FrontMatter.Default, builder =>
                 {
                     builder.AddMarkupContent(0, Markdown.ToHtml(_content, MarkdownPipeline));
                 });
 
                 builder.AddContent(0, ChildContent, pageContext);
+            }
+        }
+
+        protected override void OnAfterRender(bool firstRender)
+        {
+            if (firstRender && _shouldRender)
+            {
+                Assumes.Present(RoutingManager);
+
+                RoutingManager.UpdateHistoryLocation(RouteContext.CapturedSegments.Concat(RouteContext.CurrentSegments).ToArray());
             }
         }
     }

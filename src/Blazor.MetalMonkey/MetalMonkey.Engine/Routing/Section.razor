@@ -1,0 +1,49 @@
+﻿@implements IActivatable
+
+@inject ILogger<Section> Logger
+
+@if (Parent is not null)
+{
+    @Parent.ViewHeadingTemplate(this);
+}
+else
+{
+    <li @onclick="Activate">@Heading</li>
+}
+
+
+@code {
+
+    private static int defaultId = 0;
+
+    [Parameter] public string Id { get; set; } = defaultId++.ToString();
+
+    [Parameter] public string? Name { get; set; }
+
+    [Parameter] public RenderFragment? Heading { get; set; }
+
+    [Parameter] public RenderFragment<MetalRouteContext>? Content { get; set; }
+
+    [CascadingParameter] private ViewIndex<Section>? Parent { get; set; }
+
+    public void Activate()
+    {
+        Parent?.SetActive(this);
+    }
+
+    public RenderFragment? GetContent(MetalRouteContext routeContext)
+    {
+        if (Name is not null)
+        {
+            routeContext = routeContext.CaptureSegments(Name);
+        }
+
+        Logger.LogInformation("Getting content. Id='{Id}', Name='{Name}', Context='{Context}'", Id, Name, routeContext);
+        return Content?.Invoke(routeContext);
+    }
+
+    protected override void OnInitialized()
+    {
+        Parent?.Add(this);
+    }
+}

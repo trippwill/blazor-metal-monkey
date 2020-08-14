@@ -3,9 +3,9 @@ using Microsoft.AspNetCore.Components;
 
 namespace MetalMonkey.Engine.Routing
 {
-    public readonly struct PageContext
+    public readonly struct PostContext
     {
-        public PageContext(FrontMatter frontMatter, RenderFragment content)
+        public PostContext(FrontMatter frontMatter, RenderFragment content)
         {
             FrontMatter = frontMatter;
             Content = content;

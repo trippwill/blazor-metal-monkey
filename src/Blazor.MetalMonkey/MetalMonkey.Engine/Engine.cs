@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using Blazor.Extensions.Logging;
 using Markdig;
+using MetalMonkey.Engine.Interop;
 using MetalMonkey.Engine.Routing;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,9 +24,14 @@ namespace MetalMonkey.Engine
                 .AddBrowserConsole()
                 .SetMinimumLevel(logLevel));
 
-            builder.Services.AddSingleton(new MarkdownPipelineBuilder().UseAdvancedExtensions().Build());
+            builder.Services.AddSingleton(new MarkdownPipelineBuilder()
+                .UseAdvancedExtensions()
+                .UseYamlFrontMatter()
+                .Build());
 
             builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+            builder.Services.AddSingleton<EngineInterop>();
+            builder.Services.AddSingleton<RoutingManager>();
 
             return builder;
         }

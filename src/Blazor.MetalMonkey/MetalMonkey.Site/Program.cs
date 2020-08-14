@@ -9,7 +9,7 @@ namespace MetalMonkey.Site
     {
         public static async Task Main(string[] args)
         {
-            var builder = Engine.Engine.Initialize(args, Microsoft.Extensions.Logging.LogLevel.Debug);
+            var builder = Engine.Engine.Initialize(args, Microsoft.Extensions.Logging.LogLevel.Information);
 
             builder.RootComponents.Add<App>("app");
 
