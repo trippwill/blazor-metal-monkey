@@ -9,60 +9,52 @@ using Microsoft.Extensions.Logging;
 
 namespace MetalMonkey.Engine.Routing
 {
-    public partial class ViewIndex<TView> where TView : IActivatable
+    public partial class ViewIndex<TView> where TView : class, IActivatable
     {
         private IEnumerable<string> _segments = Utilities.EmptyStringList;
 
-        public Section? ActiveSection { get; private set; }
+        public TView? ActiveView { get; private set; }
 
         [Inject] private ILogger<ViewIndex<TView>>? Logger { get; set; }
 
         [Inject] private RoutingManager? RoutingManager { get; set; }
 
-        private List<Section> SectionStore { get; } = new List<Section>();
-        
-        internal void Add(Section section)
+        //private List<TView> ViewStore { get; } = new List<TView>();
+
+        internal void Add(TView view)
         {
-            SectionStore.Add(section);
+            //ViewStore.Add(view);
 
-            Logger.LogInformation("Added section {Id} with Name {Name}", section.Id, section.Name);
+            Logger.LogInformation("[{Id}]: Adding view {ViewId} with Name {Name}", Id, view.Id, view.Name);
 
-            if (ActiveSection is null && section.Name is not null)
+            if (ActiveView is null && view.Name is not null)
             {
-                Logger.LogInformation("ActiveSection is null");
+                Logger.LogInformation("[{Id}]: ActiveView is null", Id);
 
-                var currentSection = System.IO.Path.Join(Base, section.Name);
-                var sectionSegments = currentSection.SplitPath().ToList();
+                var currentView = System.IO.Path.Join(Base, view.Name);
+                var viewSegments = currentView.SplitPath().ToList();
 
                 Assumes.Present(RoutingManager);
-                Logger.LogInformation("SectionSegments='{0}', NavSegments='{1}'", sectionSegments.JoinPath(), RoutingManager.BaseRelativePath);
-                
-                if (RoutingManager.BaseRelativePath.SplitPath().SequenceStartsWith(sectionSegments, StringComparer.OrdinalIgnoreCase))
+                Logger.LogInformation("[{Id}]: ViewSegments='{0}', NavSegments='{1}'",Id ,viewSegments.JoinPath(), RoutingManager.BaseRelativePath);
+
+                if (RoutingManager.BaseRelativePath.SplitPath().SequenceStartsWith(viewSegments, StringComparer.OrdinalIgnoreCase))
                 {
-                    Logger.LogInformation("Segments are a match! Id='{Id}', Name='{Name}'", section.Id, section.Name);
-                    SetActive(section);
+                    Logger.LogInformation("[{Id}]: Segments are a match! Id='{Id}', Name='{Name}'", Id, view.Id, view.Name);
+                    SetActive(view);
                 }
             }
         }
 
-        internal void SetActive(Section section)
+        internal void SetActive(TView view)
         {
-            if (ActiveSection != section)
+            if (ActiveView != view)
             {
-                ActiveSection = section;
+                ActiveView = view;
                 StateHasChanged();
 
                 Assumes.Present(RoutingManager);
-                RoutingManager.UpdateHistoryLocation(Base, section.Name);
-            }
-        }
 
-        protected override void OnAfterRender(bool firstRender)
-        {
-            if (firstRender && ActiveSection is null)
-            {
-                Logger.LogInformation("No active section. Selecting first section.");
-                SectionStore.First().Activate();
+                //RoutingManager.UpdateHistoryLocation(Base, view.Name);
             }
         }
     }

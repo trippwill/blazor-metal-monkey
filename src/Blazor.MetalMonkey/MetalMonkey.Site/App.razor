@@ -2,17 +2,16 @@
 @using MetalMonkey.Site.FutureImperfect.Shared
 @using MetalMonkey.Site.FutureImperfect.Pages
 
-<ViewIndex TView=Section>
-    <Views>
-        <Section>
-            <Heading>Home</Heading>
-            <Content>
-                <MetalMonkey.Site.FutureImperfect.Pages.Post>
-                    <Content>Head Section</Content>
-                </MetalMonkey.Site.FutureImperfect.Pages.Post>
-            </Content>
-        </Section>
+<ViewIndex Id="Main" TView=Section DefaultView="@typeof(MetalMonkey.Site.Dimension.Pages.IndexPage)">
+    <IndexHeaderTemplate Context="views">
+        <nav>
+            <ul>
+                @views
+            </ul>
+        </nav>
+    </IndexHeaderTemplate>
 
+    <Views>
         <Section Name="pages">
             <Heading>Pages</Heading>
             <Content>
@@ -27,18 +26,16 @@
         <Section Name="blog">
             <Heading>Blog</Heading>
             <Content>
-                <ViewIndex TView=Section Base="blog">
+                <ViewIndex Id="Blog" TView=Section Base="blog" DefaultView="@typeof(MetalMonkey.Site.FutureImperfect.Pages.IndexPage)">
+                    <IndexHeaderTemplate Context="views">
+                        <nav class="links">
+                            <ul>
+                                <li><a href="/blog">Blog Home</a></li>
+                                @views
+                            </ul>
+                        </nav>
+                    </IndexHeaderTemplate>
                     <Views>
-                        <Section>
-                            <Heading>Blog Home</Heading>
-                            <Content Context="routeContext">
-                                <IndexLayout>
-                                    <Body>
-                                        Blog Home Section
-                                    </Body>
-                                </IndexLayout>
-                            </Content>
-                        </Section>
                         <Section Name="post">
                             <Content Context="routeContext">
                                 <PageLayout>

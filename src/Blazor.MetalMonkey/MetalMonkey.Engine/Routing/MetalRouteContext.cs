@@ -5,6 +5,8 @@ namespace MetalMonkey.Engine.Routing
 {
     public readonly struct MetalRouteContext
     {
+        public static implicit operator string[](MetalRouteContext context) => context.AllSegments.ToArray();
+
         internal MetalRouteContext(IEnumerable<string> parentSegments, IEnumerable<string> currentSegments)
         {
             CapturedSegments = parentSegments;
@@ -14,6 +16,13 @@ namespace MetalMonkey.Engine.Routing
         public IEnumerable<string> CapturedSegments {get;}
 
         public IEnumerable<string> CurrentSegments {get;}
+
+        public IEnumerable<string> AllSegments => CapturedSegments.Concat(CurrentSegments);
+
+        public override string ToString()
+        {
+            return $"ParentSegments={CapturedSegments.JoinPath()}, CurrentSegments={CurrentSegments.JoinPath()}";
+        }
 
         internal static MetalRouteContext FromBaseRelativePath(string relativePath)
         {
@@ -35,11 +44,6 @@ namespace MetalMonkey.Engine.Routing
                 CapturedSegments.Concat(currentCapturedSegments),
                 CurrentSegments.Skip(currentCapturedSegments.Count())
                 );
-        }
-
-        public override string ToString()
-        {
-            return $"ParentSegments={CapturedSegments.JoinPath()}, CurrentSegments={CurrentSegments.JoinPath()}";
         }
     }
 }

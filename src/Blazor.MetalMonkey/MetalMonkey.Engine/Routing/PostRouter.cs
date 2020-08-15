@@ -67,11 +67,11 @@ namespace MetalMonkey.Engine.Routing
 
         protected override void OnAfterRender(bool firstRender)
         {
-            if (firstRender && _shouldRender)
-            {
-                Assumes.Present(RoutingManager);
+            Assumes.Present(RoutingManager);
 
-                RoutingManager.UpdateHistoryLocation(RouteContext.CapturedSegments.Concat(RouteContext.CurrentSegments).ToArray());
+            if (_shouldRender)
+            {
+                RoutingManager.UpdateHistoryLocation(RouteContext);
             }
         }
     }

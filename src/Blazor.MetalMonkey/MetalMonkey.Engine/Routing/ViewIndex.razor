@@ -1,19 +1,35 @@
 ﻿@typeparam TView
 
-<CascadingValue Value=@this TValue="ViewIndex<TView>">
-    @IndexHeaderTemplate(Views)
-</CascadingValue>
+@if (ActiveView is not null)
+{
+    <CascadingValue Value=this>
+        @IndexHeaderTemplate(Views)
+    </CascadingValue>
 
-@ActiveSection?.GetContent(RoutingManager!.CurrentTopRouteContext.CaptureSegments(Base))
+    @ActiveView?.GetContent(RoutingManager!.CurrentTopRouteContext.CaptureSegments(Base))
+}
+else
+{
+    <CascadingValue Value=this>
+        <ComponentView Component=@DefaultView>
+            @IndexHeaderTemplate(Views)
+        </ComponentView>
+    </CascadingValue>
+}
 
-@code {
-        [Parameter] public string Base { get; set; } = string.Empty;
+@code{
 
-        [Parameter] public RenderFragment? Views { get; set; }
+    [Parameter] public string? Id { get; set; }
 
-        [Parameter] public RenderFragment<TView> ViewHeadingTemplate { get; set; } = DefaultViewHeadingTemplate;
+    [Parameter] public string Base { get; set; } = string.Empty;
 
-        [Parameter] public RenderFragment<RenderFragment?> IndexHeaderTemplate { get; set; } = DefaultIndexHeaderTemplate;
+    [Parameter] public RenderFragment? Views { get; set; }
+
+    [Parameter] public RenderFragment<TView> ViewHeadingTemplate { get; set; } = DefaultViewHeadingTemplate;
+
+    [Parameter] public RenderFragment<RenderFragment?> IndexHeaderTemplate { get; set; } = DefaultIndexHeaderTemplate;
+
+    [Parameter] public Type DefaultView { get; set; } = typeof(RoutingError);
 
     private static RenderFragment<TView> DefaultViewHeadingTemplate => view => builder =>
     {
@@ -25,8 +41,8 @@
             builder.OpenElement(2, "a");
             builder.AddAttribute(3, "onclick", EventCallback.Factory.Create(view, view.Activate));
             builder.AddContent(4, view.Heading);
-            builder.CloseElement(); //a
-            builder.CloseElement(); // li
+            builder.CloseElement();
+            builder.CloseElement();
             builder.CloseRegion();
         }
     };

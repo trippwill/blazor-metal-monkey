@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using MetalMonkey.Engine.Interop;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Routing;
+using Microsoft.Extensions.Logging;
 
 namespace MetalMonkey.Engine.Routing
 {
@@ -10,11 +13,13 @@ namespace MetalMonkey.Engine.Routing
     {
         private readonly NavigationManager _navigationManager;
         private readonly EngineInterop _engineInterop;
+        private readonly ILogger<RoutingManager> _logger;
 
-        public RoutingManager(NavigationManager navigationManager, EngineInterop engineInterop)
+        public RoutingManager(NavigationManager navigationManager, EngineInterop engineInterop, ILogger<RoutingManager> logger)
         {
             _navigationManager = navigationManager;
             _engineInterop = engineInterop;
+            _logger = logger;
 
             _navigationManager.LocationChanged += _navigationManager_LocationChanged;
             BaseUri = _navigationManager.BaseUri;
@@ -35,9 +40,12 @@ namespace MetalMonkey.Engine.Routing
 
         public void UpdateHistoryLocation(params string?[] relativeSegments)
         {
-            var newLocation = Path.Join(relativeSegments);
-            _engineInterop.PushLocation($"{BaseUri}{newLocation}");
+            var newLocation = $"{BaseUri}{Path.Join(relativeSegments)}";
+            _engineInterop.PushLocation(newLocation);
+            _logger.LogInformation("Pushed location update '{0}'", newLocation);
         }
+
+        public void UpdateHistoryLocation() => UpdateHistoryLocation(CurrentTopRouteContext.AllSegments.ToArray());
 
         public void Dispose()
         {

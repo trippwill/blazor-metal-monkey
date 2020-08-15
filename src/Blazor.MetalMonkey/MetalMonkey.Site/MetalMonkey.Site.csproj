@@ -22,4 +22,8 @@
     <ProjectReference Include="..\MetalMonkey.Engine\MetalMonkey.Engine.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Dimension\Shared\" />
+  </ItemGroup>
+
 </Project>

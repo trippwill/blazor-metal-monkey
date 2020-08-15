@@ -7,7 +7,7 @@ namespace MetalMonkey.Engine
     {
         private const char PathSeparator = '/';
 
-        public static string JoinPath(this IEnumerable<string> segments) => string.Join(PathSeparator, segments);
+        public static string JoinPath(this IEnumerable<string?> segments) => string.Join(PathSeparator, segments);
 
         public static IEnumerable<string> SplitPath(this string path) =>
             path.Split(PathSeparator, System.StringSplitOptions.TrimEntries | System.StringSplitOptions.RemoveEmptyEntries);
